@@ -12,17 +12,17 @@
 const Theme = {
   /* ---------- 调色 ---------- */
   COL: {
-    bgTop: '#241b45',
-    bgBottom: '#0c0918',
-    glow: 'rgba(120, 96, 220, 0.30)',
-    panelTop: '#2b2450',
-    panelBottom: '#181233',
-    panelEdge: '#463c78',
-    trackTop: '#2f2856',
-    trackBottom: '#1d1839',
-    trackEdge: 'rgba(126, 112, 190, 0.45)',
-    lane: '#191436',
-    laneEdge: 'rgba(108, 96, 160, 0.55)',
+    bgTop: '#1e1838',
+    bgBottom: '#0a0818',
+    glow: 'rgba(110, 92, 200, 0.22)',
+    panelTop: '#282248',
+    panelBottom: '#15102e',
+    panelEdge: '#3e3668',
+    trackTop: '#2a2450',
+    trackBottom: '#1a1636',
+    trackEdge: 'rgba(116, 102, 180, 0.35)',
+    lane: '#161230',
+    laneEdge: 'rgba(100, 90, 150, 0.40)',
   },
 
   /* ---------- 离屏缓存 ---------- */
@@ -61,7 +61,7 @@ const Theme = {
       const bx = cv.getContext('2d');
       const g = bx.createLinearGradient(0, 0, 0, h);
       g.addColorStop(0, this.COL.bgTop);
-      g.addColorStop(0.55, '#171130');
+      g.addColorStop(0.5, '#15102e');
       g.addColorStop(1, this.COL.bgBottom);
       bx.fillStyle = g;
       bx.fillRect(0, 0, w, h);

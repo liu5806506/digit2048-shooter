@@ -218,7 +218,8 @@ window.CONF = {
  * 保证瞄准光柱、爆点光环的颜色和方块本体是同一套色。
  */
 (function recolor() {
-  const BASE_HUES = [188, 205, 222, 245, 268, 292, 318, 340, 5, 22, 38, 52, 75, 110, 145, 170];
+  // 自然色系：从冷到暖再回到冷，覆盖天空、海洋、紫罗兰、玫瑰、珊瑚、琥珀、森林、大地
+  const BASE_HUES = [195, 210, 230, 255, 280, 305, 330, 350, 15, 35, 55, 80, 120, 155, 175, 195];
 
   function hls2rgb(h, l, s) {
     h = (((h % 360) + 360) % 360) / 360;
@@ -242,12 +243,14 @@ window.CONF = {
   for (let v = 1; v <= 32; v++) {
     const hue = BASE_HUES[(v - 1) % BASE_HUES.length];
     let sat, light;
-    if (v <= 16) { sat = 0.68; light = 0.56; }
-    else if (v <= 24) { sat = 0.55; light = 0.47; }
-    else { sat = 0.40; light = 0.40; }
+    // 降低饱和度，让色彩更自然、更耐看
+    if (v <= 8) { sat = 0.52; light = 0.58; }       // 常见低数值：柔和明亮
+    else if (v <= 16) { sat = 0.48; light = 0.54; }  // 中等数值：稍微沉稳
+    else if (v <= 24) { sat = 0.42; light = 0.48; }  // 高数值：更内敛
+    else { sat = 0.35; light = 0.42; }                // 顶级数值：低调奢华
     const base = hex(hls2rgb(hue, light, sat));
-    const dark = hex(hls2rgb(hue, Math.max(0, light - 0.16), sat));
-    const darker = hex(hls2rgb(hue, Math.max(0, light - 0.26), sat));
+    const dark = hex(hls2rgb(hue, Math.max(0, light - 0.14), sat));
+    const darker = hex(hls2rgb(hue, Math.max(0, light - 0.24), sat));
     out.push([base, dark, darker, base]);
   }
   CONF.TAIL_COLOR = out;

@@ -51,14 +51,15 @@ const BlockDrawer = {
     const x = pad;
     const y = pad;
 
-    // 外阴影
-    ctx.shadowColor = 'rgba(0,0,0,0.35)';
-    ctx.shadowBlur = 8;
-    ctx.shadowOffsetY = 4;
+    // 外阴影（更柔和）
+    ctx.shadowColor = 'rgba(0,0,0,0.25)';
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetY = 5;
 
-    // 主体垂直渐变
+    // 主体垂直渐变（更平滑）
     const grad = ctx.createLinearGradient(x, y, x, y + bh);
     grad.addColorStop(0, colors[0]);
+    grad.addColorStop(0.5, colors[3] || colors[0]);  // 中间色，让渐变更丰富
     grad.addColorStop(1, colors[1]);
     roundRectPath(ctx, x, y, bw, bh, r);
     ctx.fillStyle = grad;
@@ -68,27 +69,37 @@ const BlockDrawer = {
     ctx.shadowBlur = 0;
     ctx.shadowOffsetY = 0;
 
-    // 顶部高光
-    const hl = ctx.createLinearGradient(x, y, x, y + bh * 0.55);
-    hl.addColorStop(0, 'rgba(255,255,255,0.30)');
+    // 顶部高光（更柔和、范围更大）
+    const hl = ctx.createLinearGradient(x, y, x, y + bh * 0.65);
+    hl.addColorStop(0, 'rgba(255,255,255,0.28)');
+    hl.addColorStop(0.5, 'rgba(255,255,255,0.10)');
     hl.addColorStop(1, 'rgba(255,255,255,0)');
-    roundRectPath(ctx, x + 2, y + 2, bw - 4, bh * 0.55, Math.max(0, r - 2));
+    roundRectPath(ctx, x + 2, y + 2, bw - 4, bh * 0.65, Math.max(0, r - 2));
     ctx.fillStyle = hl;
     ctx.fill();
 
-    // 底部暗角
-    const bot = ctx.createLinearGradient(x, y + bh * 0.55, x, y + bh);
+    // 底部暗角（更轻柔）
+    const bot = ctx.createLinearGradient(x, y + bh * 0.5, x, y + bh);
     bot.addColorStop(0, 'rgba(0,0,0,0)');
-    bot.addColorStop(1, 'rgba(0,0,0,0.20)');
-    roundRectPath(ctx, x + 2, y + bh * 0.45, bw - 4, bh * 0.55 - 2, Math.max(0, r - 2));
+    bot.addColorStop(1, 'rgba(0,0,0,0.18)');
+    roundRectPath(ctx, x + 2, y + bh * 0.5, bw - 4, bh * 0.5 - 2, Math.max(0, r - 2));
     ctx.fillStyle = bot;
     ctx.fill();
 
-    // 内边框（1px 高光边）
-    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    // 内边框（更精致的 1px 高光边）
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
     ctx.lineWidth = 1;
     roundRectPath(ctx, x + 0.5, y + 0.5, bw - 1, bh - 1, r);
     ctx.stroke();
+
+    //  subtle inner glow for depth
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = 0.08;
+    ctx.fillStyle = colors[0];
+    roundRectPath(ctx, x + 4, y + 4, bw - 8, bh * 0.4, Math.max(0, r - 4));
+    ctx.fill();
+    ctx.restore();
 
     // 数字
     const label = this.format(v);
@@ -171,12 +182,13 @@ const BlockDrawer = {
     ctx.save();
     ctx.globalAlpha *= alpha;
 
-    ctx.shadowColor = 'rgba(0,0,0,0.35)';
-    ctx.shadowBlur = 8 * scale;
-    ctx.shadowOffsetY = 4 * scale;
+    ctx.shadowColor = 'rgba(0,0,0,0.25)';
+    ctx.shadowBlur = 10 * scale;
+    ctx.shadowOffsetY = 5 * scale;
 
     const grad = ctx.createLinearGradient(x, y, x, y + bh);
     grad.addColorStop(0, colors[0]);
+    grad.addColorStop(0.5, colors[3] || colors[0]);
     grad.addColorStop(1, colors[1]);
     roundRectPath(ctx, x, y, bw, bh, r);
     ctx.fillStyle = grad;
@@ -186,24 +198,34 @@ const BlockDrawer = {
     ctx.shadowBlur = 0;
     ctx.shadowOffsetY = 0;
 
-    const hl = ctx.createLinearGradient(x, y, x, y + bh * 0.55);
-    hl.addColorStop(0, 'rgba(255,255,255,0.30)');
+    const hl = ctx.createLinearGradient(x, y, x, y + bh * 0.65);
+    hl.addColorStop(0, 'rgba(255,255,255,0.28)');
+    hl.addColorStop(0.5, 'rgba(255,255,255,0.10)');
     hl.addColorStop(1, 'rgba(255,255,255,0)');
-    roundRectPath(ctx, x + 2 * scale, y + 2 * scale, bw - 4 * scale, bh * 0.55, Math.max(0, r - 2 * scale));
+    roundRectPath(ctx, x + 2 * scale, y + 2 * scale, bw - 4 * scale, bh * 0.65, Math.max(0, r - 2 * scale));
     ctx.fillStyle = hl;
     ctx.fill();
 
-    const bot = ctx.createLinearGradient(x, y + bh * 0.55, x, y + bh);
+    const bot = ctx.createLinearGradient(x, y + bh * 0.5, x, y + bh);
     bot.addColorStop(0, 'rgba(0,0,0,0)');
-    bot.addColorStop(1, 'rgba(0,0,0,0.20)');
-    roundRectPath(ctx, x + 2 * scale, y + bh * 0.45, bw - 4 * scale, bh * 0.55 - 2 * scale, Math.max(0, r - 2 * scale));
+    bot.addColorStop(1, 'rgba(0,0,0,0.18)');
+    roundRectPath(ctx, x + 2 * scale, y + bh * 0.5, bw - 4 * scale, bh * 0.5 - 2 * scale, Math.max(0, r - 2 * scale));
     ctx.fillStyle = bot;
     ctx.fill();
 
-    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
     ctx.lineWidth = 1 * scale;
     roundRectPath(ctx, x + 0.5 * scale, y + 0.5 * scale, bw - 1 * scale, bh - 1 * scale, r);
     ctx.stroke();
+
+    // inner glow
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = 0.08 * alpha;
+    ctx.fillStyle = colors[0];
+    roundRectPath(ctx, x + 4 * scale, y + 4 * scale, bw - 8 * scale, bh * 0.4, Math.max(0, r - 4 * scale));
+    ctx.fill();
+    ctx.restore();
 
     const label = this.format(v);
     const fs = this.fontSize(label) * scale;
