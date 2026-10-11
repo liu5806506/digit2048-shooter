@@ -8,6 +8,7 @@ android/build/
 android/app/build/
 android/captures/
 android/local.properties
+android/keystore.properties
 *.iml
 
 # Capacitor generated (regenerated on `cap sync`)
