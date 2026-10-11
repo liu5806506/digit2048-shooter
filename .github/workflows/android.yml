@@ -39,6 +39,16 @@ jobs:
         with:
           packages: platform-tools build-tools;34.0.0 platforms;android-34 ndk;25.2.9519653 cmake;3.22.1
 
+      - name: Prepare keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/digit2048-release.jks
+          cat > android/keystore.properties <<EOF
+          storeFile=../digit2048-release.jks
+          storePassword=${{ secrets.STORE_PASSWORD }}
+          keyAlias=digit2048
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          EOF
+
       - name: Build release APK
         run: |
           cd android
