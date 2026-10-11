@@ -1,0 +1,1 @@
+{ "type": "View", "props": { "width": 55, "height": 55 }, "compId": 2, "child": [{ "type": "Image", "props": { "y": 27, "x": 27, "skin": "game/tool1.png", "anchorY": 0.5, "anchorX": 0.5 }, "compId": 3 }], "loadList": ["game/tool1.png"], "loadList3D": [] }

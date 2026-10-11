@@ -1,0 +1,6 @@
+[
+  {
+    "eval": "(async()=>{const sleep=ms=>new Promise(z=>setTimeout(z,ms));const sample=()=>{let mc=0;for(let x=0;x<5;x++)for(let y=0;y<8;y++){if(Game.model.getBlock(x,y))mc++;}return {t:0,model:mc,view:Game.grid.blocks.size,score:Game.model.data.score,anim:Game.grid.animInPlay,tw:Tween.list.length,guide:Game.grid.guideStep};};const log=[];for(let x=0;x<5;x++){for(let y=0;y<8;y++){if(!Game.model.getBlock(x,y))Game.model.addNewBlock(x,y,1);}}Game.model.saveBlocks();log.push(Object.assign(sample(),{t:'fill'}));for(let i=0;i<12;i++){await sleep(250);const s=sample();s.t=(i+1)*250;log.push(s);}return JSON.stringify({log,guideVisible:Game.grid.guideVisible});})()",
+    "wait": 100
+  }
+]

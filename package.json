@@ -1,0 +1,19 @@
+{
+  "name": "digit2048-shooter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "数字射击 2048 —— Android 壳（Capacitor）。游戏本体的运行时代码仍是零依赖的纯 JS。",
+  "scripts": {
+    "web": "node build.js",
+    "sync": "node build.js && cap sync android",
+    "apk": "cd android && gradlew.bat assembleRelease"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.6.9",
+    "@capacitor/app": "^7.1.2",
+    "@capacitor/core": "^7.6.9"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.6.9"
+  }
+}

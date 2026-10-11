@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Build artifacts
+dist/
+android/.gradle/
+android/build/
+android/app/build/
+android/captures/
+android/local.properties
+*.iml
+
+# Capacitor generated (regenerated on `cap sync`)
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local
+*.local
+.env

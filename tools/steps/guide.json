@@ -1,0 +1,7 @@
+[
+  {
+    "eval": "(async()=>{const c=document.getElementById('game');const r=c.getBoundingClientRect();const s=Game.scale,oy=Game.oy;const P=(dx,dy)=>({clientX:r.left+dx*s,clientY:r.top+oy+dy*s});const sleep=ms=>new Promise(z=>setTimeout(z,ms));const settle=async()=>{for(let i=0;i<150;i++){if(Game.grid.animInPlay===0&&Tween.list.length===0){await sleep(140);if(Game.grid.animInPlay===0&&Tween.list.length===0)return;}await sleep(70);}};const shoot=async(col)=>{const x=CONF.GRID.x+(col+0.5)*CONF.CELL_W,y=CONF.BORN.y;c.dispatchEvent(new PointerEvent('pointerdown',{pointerId:1,bubbles:true,...P(x,y)}));c.dispatchEvent(new PointerEvent('pointermove',{pointerId:1,bubbles:true,...P(x,y-160)}));await sleep(40);c.dispatchEvent(new PointerEvent('pointerup',{pointerId:1,bubbles:true,...P(x,y-160)}));await settle();};const log=[];const cols=[1,1,2,2,2,2];for(let i=0;i<cols.length;i++){await shoot(cols[i]);log.push('shot col'+cols[i]+' -> step='+Game.grid.guideStep+' col='+Game.grid.guideCol+' visible='+Game.grid.guideVisible+' inGuide='+Game.model.inGuide+' score='+Game.model.data.score);}return JSON.stringify({log,blocks:Game.model.data.blocks});})()",
+    "wait": 300,
+    "shot": "clone-09-guide.png"
+  }
+]

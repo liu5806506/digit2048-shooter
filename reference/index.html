@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>2048 Puzzle</title>
+    <meta charset="utf-8" />
+    <meta name="renderer" content="webkit" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="full-screen" content="true" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+
+    <!-- YouTube Playables SDK -->
+    <script src="https://www.youtube.com/game_api/v1" nonce="AvmE4Htk76tlZoAQ3KP_Ag"></script>
+
+    <style>
+        * { margin: 0; padding: 0; }
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+
+    <script type="text/javascript" nonce="AvmE4Htk76tlZoAQ3KP_Ag">
+    // ==========================================
+    // YouTube Playables Shield Layer
+    // ==========================================
+    (function() {
+        'use strict';
+
+        // --- 1. 全局错误捕获 ---
+        window.addEventListener('error', function(e) {
+            try {
+                var msg = e.message || 'Unknown error';
+                var src = (e.filename || '') + ':' + (e.lineno || 0);
+                console.error('[YT-Shield] Error:', msg, 'at', src);
+                if (typeof ytgame !== 'undefined' && ytgame.health && ytgame.health.logError) {
+                    ytgame.health.logError(msg + ' at ' + src);
+                }
+            } catch(ex) {}
+        });
+
+        window.addEventListener('unhandledrejection', function(e) {
+            try {
+                var reason = e.reason ? (e.reason.message || String(e.reason)) : 'Unknown rejection';
+                console.error('[YT-Shield] Unhandled rejection:', reason);
+                if (typeof ytgame !== 'undefined' && ytgame.health && ytgame.health.logError) {
+                    ytgame.health.logError('Unhandled rejection: ' + reason);
+                }
+            } catch(ex) {}
+        });
+
+        // --- 2. 禁用全屏请求 ---
+        var noopPromise = function() { return Promise.resolve(); };
+        if (typeof HTMLElement !== 'undefined') {
+            HTMLElement.prototype.requestFullscreen = noopPromise;
+            HTMLElement.prototype.webkitRequestFullScreen = noopPromise;
+            HTMLElement.prototype.webkitRequestFullscreen = noopPromise;
+            HTMLElement.prototype.mozRequestFullScreen = noopPromise;
+            HTMLElement.prototype.msRequestFullscreen = noopPromise;
+        }
+        if (typeof Document !== 'undefined') {
+            Document.prototype.exitFullscreen = noopPromise;
+            Document.prototype.webkitExitFullscreen = noopPromise;
+            Document.prototype.mozCancelFullScreen = noopPromise;
+            Document.prototype.msExitFullscreen = noopPromise;
+        }
+
+        // --- 3. WebGL Context 恢复 ---
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var canvases = document.querySelectorAll('canvas');
+                canvases.forEach(function(canvas) {
+                    canvas.addEventListener('webglcontextlost', function(e) {
+                        e.preventDefault();
+                        console.warn('[YT-Shield] WebGL context lost, will attempt restore');
+                    });
+                    canvas.addEventListener('webglcontextrestored', function() {
+                        console.log('[YT-Shield] WebGL context restored');
+                    });
+                });
+            }, 1000);
+        });
+
+        // --- 4. localStorage / sessionStorage 内存 Polyfill ---
+        (function() {
+            function MemoryStorage() {
+                this._data = {};
+            }
+            MemoryStorage.prototype.getItem = function(key) { return this._data.hasOwnProperty(key) ? this._data[key] : null; };
+            MemoryStorage.prototype.setItem = function(key, value) { this._data[key] = String(value); };
+            MemoryStorage.prototype.removeItem = function(key) { delete this._data[key]; };
+            MemoryStorage.prototype.clear = function() { this._data = {}; };
+            MemoryStorage.prototype.key = function(i) { var keys = Object.keys(this._data); return keys[i] || null; };
+            Object.defineProperty(MemoryStorage.prototype, 'length', {
+                get: function() { return Object.keys(this._data).length; }
+            });
+
+            function testStorage(name) {
+                try {
+                    var s = window[name];
+                    var testKey = '__yt_test__';
+                    s.setItem(testKey, '1');
+                    s.removeItem(testKey);
+                    return true;
+                } catch(e) {
+                    return false;
+                }
+            }
+
+            if (!testStorage('localStorage')) {
+                console.warn('[YT-Shield] localStorage 不可用，使用内存 Polyfill');
+                try {
+                    Object.defineProperty(window, 'localStorage', {
+                        value: new MemoryStorage(),
+                        writable: true,
+                        configurable: true
+                    });
+                    console.log('[YT-Shield] localStorage polyfill 安装成功 (defineProperty)');
+                } catch(e2) {
+                    console.warn('[YT-Shield] defineProperty 也失败:', e2.message);
+                    // 最后手段：给 window 挂一个 _ytLocalStorage 并 patch Laya
+                    window._ytLocalStorage = new MemoryStorage();
+                }
+            }
+            if (!testStorage('sessionStorage')) {
+                console.warn('[YT-Shield] sessionStorage 不可用，使用内存 Polyfill');
+                try {
+                    Object.defineProperty(window, 'sessionStorage', {
+                        value: new MemoryStorage(),
+                        writable: true,
+                        configurable: true
+                    });
+                } catch(e2) {
+                    window._ytSessionStorage = new MemoryStorage();
+                }
+            }
+        })();
+
+        // --- 5. window.innerWidth/Height 零值防御 ---
+        (function() {
+            var _origWidth = Object.getOwnPropertyDescriptor(window, 'innerWidth') ||
+                             Object.getOwnPropertyDescriptor(Window.prototype, 'innerWidth');
+            var _origHeight = Object.getOwnPropertyDescriptor(window, 'innerHeight') ||
+                              Object.getOwnPropertyDescriptor(Window.prototype, 'innerHeight');
+
+            if (_origWidth && _origWidth.get) {
+                var origGetWidth = _origWidth.get;
+                Object.defineProperty(window, 'innerWidth', {
+                    get: function() {
+                        var v = origGetWidth.call(window);
+                        return v > 0 ? v : (document.documentElement.clientWidth || 375);
+                    },
+                    configurable: true
+                });
+            }
+            if (_origHeight && _origHeight.get) {
+                var origGetHeight = _origHeight.get;
+                Object.defineProperty(window, 'innerHeight', {
+                    get: function() {
+                        var v = origGetHeight.call(window);
+                        return v > 0 ? v : (document.documentElement.clientHeight || 667);
+                    },
+                    configurable: true
+                });
+            }
+        })();
+
+        // --- 6. Service Worker 反注册 ---
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                registrations.forEach(function(r) { r.unregister(); });
+            }).catch(function() {});
+        }
+
+        // --- 7. wx → YouTube 数据桥接 ---
+        // 提供最小化的 wx mock，让编译后的代码不报错
+        window.wx = {
+            getSystemInfoSync: function() {
+                return {
+                    windowWidth: window.innerWidth,
+                    windowHeight: window.innerHeight,
+                    screenWidth: window.innerWidth,
+                    screenHeight: window.innerHeight,
+                    model: 'YouTube',
+                    system: 'Web',
+                    platform: 'youtube',
+                    language: 'en',
+                    version: '1.0.0',
+                    SDKVersion: '2.14.0',
+                    brand: 'youtube'
+                };
+            },
+            getSystemInfo: function(obj) {
+                if (obj && obj.success) {
+                    var info = wx.getSystemInfoSync();
+                    setTimeout(function() { obj.success(info); }, 0);
+                }
+            },
+            login: function(obj) { if (obj && obj.success) setTimeout(function(){ obj.success({ code: 'yt_mock' }); }, 0); },
+            getUserInfo: function(obj) { if (obj && obj.success) setTimeout(function(){ obj.success({ userInfo: { nickName: 'Player' } }); }, 0); },
+            showShareMenu: function() {},
+            onShareAppMessage: function() {},
+            createBannerAd: function() { return { show:function(){return Promise.resolve();},hide:function(){return Promise.resolve();},destroy:function(){},onResize:function(){},onLoad:function(cb){setTimeout(cb,0);},onError:function(){},offLoad:function(){},offResize:function(){},offError:function(){},style:{realHeight:0} }; },
+            createCustomAd: function() { return { show:function(){return Promise.resolve();},hide:function(){},destroy:function(){},onLoad:function(cb){setTimeout(cb,0);},onError:function(){},onClose:function(){},offLoad:function(){},offError:function(){},offClose:function(){},style:{} }; },
+            createRewardedVideoAd: function() { return { load:function(){return Promise.resolve();},show:function(){return Promise.resolve();},onError:function(){},onAction:function(){},onClose:function(){},destroy:function(){} }; },
+            createInterstitialAd: function() { return { show:function(){return Promise.resolve();},onError:function(){},onClose:function(){},destroy:function(){} }; },
+            createInnerAudioContext: function() { return { play:function(){},pause:function(){},stop:function(){},destroy:function(){},onEnded:function(){},src:'' }; },
+            vibrateShort: function() { try { navigator.vibrate && navigator.vibrate(15); } catch(e){} },
+            vibrateLong: function() { try { navigator.vibrate && navigator.vibrate(400); } catch(e){} },
+            postMessage: function() {},
+            onMessage: function() {},
+            getOpenDataContext: function() { return { postMessage:function(){} }; },
+            env: { USER_DATA_PATH: '' },
+            getFileSystemManager: function() { return { readFileSync:function(){},readFile:function(){},writeFileSync:function(){},writeFile:function(){},accessSync:function(){return true;},access:function(){} }; },
+            getUpdateManager: function() { return { onCheckForUpdate:function(){},onUpdateReady:function(){},onUpdateFailed:function(){},applyUpdate:function(){} }; },
+            request: function(obj) { if (obj && obj.success) setTimeout(function(){ obj.success({ statusCode: 200, data: { code: 1, data: { env: 2, firstlogin: new Date().toISOString().split('T')[0] } } }); }, 0); },
+            setStorageSync: function(key, data) { try { localStorage.setItem(key, typeof data === 'string' ? data : JSON.stringify(data)); } catch(e){} },
+            getStorageSync: function(key) { try { return localStorage.getItem(key); } catch(e){ return null; } },
+            removeStorageSync: function(key) { try { localStorage.removeItem(key); } catch(e){} },
+            clearStorageSync: function() { try { localStorage.clear(); } catch(e){} },
+            getStorageInfoSync: function() { return { keys: [] }; },
+            setUserCloudStorage: function() {},
+            onShow: function() {},
+            onHide: function() {},
+            offShow: function() {},
+            offHide: function() {},
+            showToast: function(obj) { console.log('[wx.showToast]', obj && obj.title); },
+            hideToast: function() {},
+            showModal: function(obj) { if (obj && obj.success) setTimeout(function(){ obj.success({confirm:true}); },0); },
+            showLoading: function() {},
+            hideLoading: function() {},
+            navigateToMiniProgram: function() {},
+            exitMiniProgram: function() {},
+            getLaunchOptionsSync: function() { return { query: {}, scene: 1001, referrerInfo: {} }; },
+            onNetworkStatusChange: function() {},
+            setMessageToFriendQuery: function() {},
+            createGameBanner: function() { return {show:function(){},hide:function(){},destroy:function(){}}; },
+            createGameIcon: function() { return {show:function(){},hide:function(){},destroy:function(){}}; },
+            createGamePortal: function() { return {show:function(){},hide:function(){},destroy:function(){}}; },
+            createFeedbackButton: function() { return {show:function(){},hide:function(){},destroy:function(){}}; },
+            createUserInfoButton: function() { return {show:function(){},hide:function(){},destroy:function(){}}; },
+            openCustomerServiceConversation: function() {},
+            requestSubscribeMessage: function() {},
+            updateShareMenu: function() {},
+            setClipboardData: function(obj) { if (obj && obj.success) setTimeout(function(){ obj.success(); }, 0); },
+            getSetting: function(obj) { if (obj && obj.success) setTimeout(function(){ obj.success({ authSetting: {} }); }, 0); },
+            authorize: function() {}
+        };
+    })();
+    </script>
+</head>
+
+<body>
+    <script type="text/javascript" nonce="AvmE4Htk76tlZoAQ3KP_Ag">
+        function loadLib(url) {
+            var script = document.createElement("script");
+            script.async = false;
+            script.src = url;
+            document.body.appendChild(script);
+        }
+    </script>
+    <script type="text/javascript" src="index.js" nonce="AvmE4Htk76tlZoAQ3KP_Ag"></script>
+
+    <!-- YouTube Playables 生命周期 + 屏幕适配 -->
+    <script type="text/javascript" nonce="AvmE4Htk76tlZoAQ3KP_Ag">
+    (function() {
+        'use strict';
+
+        // ==========================================
+        // YouTube 生命周期管理
+        // ==========================================
+        var ytReady = false;
+        var gameReadySent = false;
+
+        // 等待引擎就绪
+        var waitForEngine = setInterval(function() {
+            if (typeof Laya === 'undefined' || !Laya.stage) return;
+            clearInterval(waitForEngine);
+
+            console.log('[YT] Laya engine ready, 注册 YouTube 生命周期');
+
+            // firstFrameReady - 第一帧渲染
+            try { ytgame.game.firstFrameReady(); } catch(e) {
+                console.warn('[YT] firstFrameReady failed:', e);
+            }
+            ytReady = true;
+
+            // 暂停/恢复
+            try {
+                ytgame.system.onPause(function() {
+                    console.log('[YT] onPause');
+                    Laya.timer.pause();
+                    Laya.SoundManager.muted = true;
+                });
+            } catch(e) {}
+
+            try {
+                ytgame.system.onResume(function() {
+                    console.log('[YT] onResume');
+                    Laya.timer.resume();
+                    // 恢复用户的音乐偏好而非强制开启
+                });
+            } catch(e) {}
+
+            // 音频开关
+            try {
+                ytgame.system.onAudioEnabledChange(function(enabled) {
+                    console.log('[YT] onAudioEnabledChange:', enabled);
+                    Laya.SoundManager.muted = !enabled;
+                });
+            } catch(e) {}
+
+            // ==========================================
+            // 横竖屏适配（利用 Laya 内置 resize 机制）
+            // ==========================================
+            // Laya 2.9 的 Stage 已自带 window resize/orientationchange 监听，
+            // 会调用 _resetCanvas() → _changeCanvasSize() → setScreenSize()。
+            // 我们只需修改 scaleMode 和 screenMode，然后触发一次重算即可。
+
+            // fixedauto = 横竖屏自动选择 fixedwidth/fixedheight
+            Laya.stage.scaleMode = 'fixedauto';
+            // none = 不强制旋转画布
+            Laya.stage.screenMode = 'none';
+
+            // 触发 Laya 内置的 canvas 重算
+            // 但要防御 YouTube iframe 初始 innerWidth=0 的情况
+            function ytResetCanvas() {
+                var w = window.innerWidth || 0;
+                var h = window.innerHeight || 0;
+                if (w > 0 && h > 0 && Laya.stage._resetCanvas) {
+                    Laya.stage._resetCanvas();
+                    console.log('[YT] resetCanvas ok, stage:', Laya.stage.width, 'x', Laya.stage.height);
+                } else {
+                    console.log('[YT] innerWidth/Height 为 0，200ms 后重试');
+                    setTimeout(ytResetCanvas, 200);
+                }
+            }
+            ytResetCanvas();
+
+            console.log('[YT] scaleMode → fixedauto, screenMode → none');
+
+            // YouTube 提供的 canvas-resize 事件 → 触发 Laya 重算
+            try {
+                if (ytgame.system && ytgame.system.onCanvasResize) {
+                    ytgame.system.onCanvasResize(function(rect) {
+                        console.log('[YT] onCanvasResize:', JSON.stringify(rect));
+                        if (Laya.stage._resetCanvas) {
+                            Laya.stage._resetCanvas();
+                        }
+                    });
+                }
+            } catch(e) {}
+
+            // ==========================================
+            // YouTube 数据云存档已移至游戏内 YTStorage 处理
+            // ==========================================
+
+        }, 50);
+
+        // ==========================================
+        // Watchdog：引擎加载超时检测
+        // ==========================================
+        setTimeout(function() {
+            if (!ytReady) {
+                console.warn('[YT-Shield] 5s 警告：引擎未就绪');
+            }
+        }, 5000);
+
+        setTimeout(function() {
+            if (!ytReady) {
+                console.error('[YT-Shield] 15s 超时：引擎加载失败');
+                try { ytgame.health.logError('Engine load timeout after 15s'); } catch(e) {}
+            }
+        }, 15000);
+    })();
+    </script>
+</body>
+</html>

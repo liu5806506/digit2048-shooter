@@ -1,0 +1,22 @@
+[
+  {
+    "eval": "(async()=>{const c=document.getElementById('game');const r=c.getBoundingClientRect();const s=Game.scale,ox=Game.ox,oy=Game.oy;const P=(dx,dy)=>({clientX:r.left+ox+dx*s,clientY:r.top+oy+dy*s});const sleep=ms=>new Promise(z=>setTimeout(z,ms));const settle=async()=>{for(let i=0;i<200;i++){if(Game.grid.animInPlay===0&&Tween.list.length===0){await sleep(120);if(Game.grid.animInPlay===0&&Tween.list.length===0)return;}await sleep(60);}};const shoot=async(col)=>{const x=CONF.GRID.x+(col+0.5)*CONF.CELL_W,y=CONF.BORN.y;c.dispatchEvent(new PointerEvent('pointerdown',{pointerId:1,bubbles:true,...P(x,y)}));c.dispatchEvent(new PointerEvent('pointermove',{pointerId:1,bubbles:true,...P(x,y-170)}));await sleep(35);c.dispatchEvent(new PointerEvent('pointerup',{pointerId:1,bubbles:true,...P(x,y-170)}));await settle();};const pick=(m,v)=>{let best=-1,bs=-Infinity;for(let x=0;x<m.width;x++){const y=m.checkIn(v,x);if(y<0)continue;let sc=-y*0.5;for(const d of [[1,0],[-1,0],[0,1],[0,-1]]){const nb=m.getBlock(x+d[0],y+d[1]);if(nb&&nb.value===v)sc+=100;}if(sc>bs){bs=sc;best=x;}}return best;};const play=async(n)=>{for(let i=0;i<n;i++){const v=Game.model.data.next||Game.model.getNext();const col=pick(Game.model,v);if(col<0)break;await shoot(col);}};window.__play=play;return JSON.stringify({w:innerWidth,h:innerHeight,scale:+Game.scale.toFixed(3)});})()",
+    "wait": 500,
+    "shot": "store-1-guide.png"
+  },
+  {
+    "eval": "(async()=>{Game.model.data.inGuide=false;Game.grid.guideVisible=false;Game.grid.guideStep=-1;Game.grid.hidePreview();await window.__play(16);let mx=0;for(let x=0;x<5;x++)for(let y=0;y<8;y++){const b=Game.model.getBlock(x,y);if(b)mx=Math.max(mx,b.value);}return JSON.stringify({score:Game.model.data.score,maxBlock:mx});})()",
+    "wait": 400,
+    "shot": "store-2-mid.png"
+  },
+  {
+    "eval": "(async()=>{await window.__play(70);let mx=0;for(let x=0;x<5;x++)for(let y=0;y<8;y++){const b=Game.model.getBlock(x,y);if(b)mx=Math.max(mx,b.value);}return JSON.stringify({score:Game.model.data.score,maxBlock:mx,curMax:Game.model.data.curMax});})()",
+    "wait": 400,
+    "shot": "store-3-high.png"
+  },
+  {
+    "eval": "(async()=>{const sleep=ms=>new Promise(z=>setTimeout(z,ms));for(let x=0;x<5;x++)for(let y=0;y<8;y++){if(!Game.model.getBlock(x,y))Game.model.addNewBlock(x,y,1);}Game.model.saveBlocks();for(const [id,b] of [...Game.grid.blocks]){}Game.model.blocks.forEach((col,x)=>col.forEach((b,y)=>{if(b&&!Game.grid.blocks.has(b.id))Game.grid.createBlock(b);}));Game.grid.pruneViews();Game.model.blocks.forEach((col,x)=>col.forEach((b,y)=>{if(b&&!Game.grid.blocks.has(b.id))Game.grid.createBlock(b);}));await sleep(300);Game.model.checkDead();await sleep(600);return JSON.stringify({over:true,score:Game.model.data.score});})()",
+    "wait": 300,
+    "shot": "store-4-result.png"
+  }
+]

@@ -1,0 +1,9 @@
+{
+  "appId": "com.digit2048.shooter.vivo",
+  "appName": "数字射击 2048",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": false
+  }
+}

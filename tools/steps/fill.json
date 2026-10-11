@@ -1,0 +1,7 @@
+[
+  {
+    "eval": "(async()=>{const sleep=ms=>new Promise(z=>setTimeout(z,ms));const before=Game.grid.blocks.size;for(let x=0;x<5;x++){for(let y=0;y<8;y++){if(!Game.model.getBlock(x,y))Game.model.addNewBlock(x,y,1);}}Game.model.saveBlocks();const mid=Game.grid.blocks.size;await sleep(1200);let modelCnt=0;for(let x=0;x<5;x++)for(let y=0;y<8;y++){if(Game.model.getBlock(x,y))modelCnt++;}const scales=[...Game.grid.blocks.values()].slice(0,6).map(v=>+v.scale.toFixed(2));return JSON.stringify({before,mid,modelCnt,viewCnt:Game.grid.blocks.size,scales,animInPlay:Game.grid.animInPlay,tweens:Tween.list.length,hasNewBlockHandler:!!EventCenter._map.get('new_block')});})()",
+    "wait": 300,
+    "shot": "clone-07-filled.png"
+  }
+]

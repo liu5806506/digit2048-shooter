@@ -1,0 +1,3 @@
+[
+  { "eval": "JSON.stringify({ready: Game.ready, p: Game.loading.p, scale: +(Game.scale||0).toFixed(3), oy: Math.round(Game.oy||0), blocks: Game.model ? Game.model.blocks.length : -1, next: Game.model && Game.model.data ? Game.model.data.next : null})", "wait": 2500, "shot": "clone-01.png" }
+]

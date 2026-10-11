@@ -1,0 +1,6 @@
+[
+  {
+    "eval": "(async()=>{const sleep=ms=>new Promise(z=>setTimeout(z,ms));for(let x=0;x<5;x++){for(let y=0;y<8;y++){if(!Game.model.getBlock(x,y))Game.model.addNewBlock(x,y,1);}}Game.model.saveBlocks();await sleep(900);const vs=[...Game.grid.blocks.values()].slice(0,8).map(v=>({id:v.id,val:v.value,vx:+v.vx.toFixed(2),vy:+v.vy.toFixed(2),s:+v.scale.toFixed(2),a:+v.alpha.toFixed(2)}));const f=Atlas.get('block/1.png');const frameInfo=f?{sx:f.sx,sy:f.sy,sw:f.sw,sh:f.sh,ox:f.ox,oy:f.oy,w:f.w,h:f.h,imgW:f.img.width,imgH:f.img.height}:null;return JSON.stringify({viewCount:Game.grid.blocks.size,views:vs,frameInfo,cellW:CONF.CELL_W,cellH:CONF.CELL_H,gridX:CONF.GRID.x,gridY:CONF.GRID.y});})()",
+    "wait": 100
+  }
+]

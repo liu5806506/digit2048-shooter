@@ -1,0 +1,17 @@
+[
+  {
+    "eval": "(async()=>{const c=document.getElementById('game');const r=c.getBoundingClientRect();const s=Game.scale,oy=Game.oy;const P=(dx,dy)=>({clientX:r.left+dx*s,clientY:r.top+oy+dy*s});const sleep=ms=>new Promise(z=>setTimeout(z,ms));const settle=async()=>{for(let i=0;i<200;i++){if(Game.grid.animInPlay===0&&Tween.list.length===0){await sleep(120);if(Game.grid.animInPlay===0&&Tween.list.length===0)return;}await sleep(60);}};const shoot=async(col)=>{const x=CONF.GRID.x+(col+0.5)*CONF.CELL_W,y=CONF.BORN.y;c.dispatchEvent(new PointerEvent('pointerdown',{pointerId:1,bubbles:true,...P(x,y)}));c.dispatchEvent(new PointerEvent('pointermove',{pointerId:1,bubbles:true,...P(x,y-160)}));await sleep(40);c.dispatchEvent(new PointerEvent('pointerup',{pointerId:1,bubbles:true,...P(x,y-160)}));await settle();};const pick=(m,value)=>{let best=-1,bs=-Infinity;for(let x=0;x<m.width;x++){const y=m.checkIn(value,x);if(y<0)continue;let sc=-y*0.5;for(const d of [[1,0],[-1,0],[0,1],[0,-1]]){const nb=m.getBlock(x+d[0],y+d[1]);if(nb&&nb.value===value)sc+=100;}if(sc>bs){bs=sc;best=x;}}return best;};Game.model.data.inGuide=false;Game.grid.guideVisible=false;Game.grid.guideStep=-1;let n=0;for(let i=0;i<26;i++){const v=Game.model.data.next||Game.model.getNext();const col=pick(Game.model,v);if(col<0)break;await shoot(col);n++;}await settle();let mx=0;for(let x=0;x<5;x++)for(let y=0;y<8;y++){const b=Game.model.getBlock(x,y);if(b)mx=Math.max(mx,b.value);}return JSON.stringify({shots:n,score:Game.model.data.score,curMax:Game.model.data.curMax,maxBlock:mx,combo:Game.model.combo,views:Game.grid.blocks.size});})()",
+    "wait": 400,
+    "shot": "clone-04-play.png"
+  },
+  {
+    "eval": "(()=>{Game.openSetting();return 'ok';})()",
+    "wait": 500,
+    "shot": "clone-05-pause.png"
+  },
+  {
+    "eval": "(()=>{Game.popup.close();for(let x=0;x<5;x++){for(let y=0;y<8;y++){if(!Game.model.getBlock(x,y))Game.model.addNewBlock(x,y,1);}}Game.model.saveBlocks();Game.grid.pruneViews();for(const [id,b] of [...Game.grid.blocks]){}Game.model.blocks.forEach((col,x)=>col.forEach((b,y)=>{if(b&&!Game.grid.blocks.has(b.id)){Game.grid.createBlock(b);}}));Game.model.checkDead();return JSON.stringify({over:true,score:Game.model.data.score});})()",
+    "wait": 800,
+    "shot": "clone-06-gameover.png"
+  }
+]
